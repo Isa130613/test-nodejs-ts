@@ -1,0 +1,23 @@
+{
+  "name": "test-nodejs-ts",
+  "version": "1.0.0",
+  "description": "Prueba de desempeño de Nodejs y Typescript 05-08-2024",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon"
+  },
+  "author": "isabela ortega vasco",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.1.0",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

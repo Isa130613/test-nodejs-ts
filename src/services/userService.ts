@@ -32,4 +32,12 @@ export default class UserService {
   async deleteUser(id: number): Promise<number> {
     return await this.userRepository.delete(id);
   }
+
+  async checkUserCredentials(
+    email: string,
+    password: string
+  ): Promise<boolean> {
+    const user = await this.userRepository.findByEmail(email);
+    return user?.dataValues.password === password;
+  }
 }

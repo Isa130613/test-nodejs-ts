@@ -9,8 +9,12 @@ export default class UserRepository {
     return await UserModel.findAll({ include: RoleModel });
   }
 
-  static async findById(id: number) {
+  static async findById(id: number): Promise<UserModel | null> {
     return await UserModel.findByPk(id);
+  }
+
+  static async findByEmail(email: string): Promise<UserModel | null> {
+    return await UserModel.findOne({ where: { email } });
   }
 
   static async create(
@@ -23,11 +27,14 @@ export default class UserRepository {
     });
   }
 
-  static async update(id: number, user: Partial<UserModel>) {
+  static async update(
+    id: number,
+    user: Partial<UserModel>
+  ): Promise<[affectedCount: number]> {
     return await UserModel.update(user, { where: { id } });
   }
 
-  static async delete(id: number) {
+  static async delete(id: number): Promise<number> {
     return await UserModel.destroy({ where: { id } });
   }
 }

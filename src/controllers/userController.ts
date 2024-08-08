@@ -1,7 +1,6 @@
 import UserService from '../services/userService';
 import { container } from 'tsyringe';
 import { Request, Response } from 'express';
-import UserModel from '../models/userModel';
 import UserType from '../interfaces/user';
 
 export default class UserController {
@@ -10,12 +9,15 @@ export default class UserController {
       const userBody: Partial<UserType> = req.body;
 
       const userService: UserService = container.resolve(UserService);
-      console.log(userService);
 
-      const user: UserModel | null = await userService.createUser(
+      const user: UserType | null = await userService.createUser(
         userBody,
         userBody.roleId || 2
       );
+
+      if (!user) {
+        throw new Error('Fields invalid');
+      }
       res.status(200).json({
         message: 'user created successfully',
         user,
@@ -30,10 +32,10 @@ export default class UserController {
     }
   }
 
-  static async getAllUsers(req: Request, res: Response) {
+  static async getAllUsers(_: Request, res: Response) {
     try {
       const userService: UserService = container.resolve(UserService);
-      const users: UserModel[] = await userService.getAllUsers();
+      const users: UserType[] = await userService.getAllUsers();
       res.status(200).json({
         status: 200,
         users: users,
@@ -50,7 +52,7 @@ export default class UserController {
     try {
       const userService: UserService = container.resolve(UserService);
       const id: number = parseInt(req.params.id);
-      const user: UserModel | null = await userService.getUserById(id);
+      const user: UserType | null = await userService.getUserById(id);
       if (!user) {
         res.status(404).json({
           status: 404,
@@ -58,7 +60,7 @@ export default class UserController {
         });
         return;
       }
-      //    user.password = '';
+      user.password = '';
       res.status(200).json({
         status: 200,
         user,
@@ -72,11 +74,14 @@ export default class UserController {
   }
 
   static async updateUser(req: Request, res: Response) {
-    const id: number = parseInt(req.params.id);
-    const user: Partial<UserModel> = req.body;
+    const paramId: number = parseInt(req.params.id);
+    const { id, roleId, ...user }: Partial<UserType> = req.body;
     try {
       const userService: UserService = container.resolve(UserService);
-      const [affectedCount]: number[] = await userService.updateUser(id, user);
+      const [affectedCount]: number[] = await userService.updateUser(
+        paramId,
+        user
+      );
       if (affectedCount === 0) {
         res.status(404).json({
           status: 404,

@@ -3,32 +3,40 @@ import PermissionModel from '../models/permissionModel';
 import RoleModel from '../models/roleModel';
 
 const insertRoles = async (): Promise<{
-  admin: RoleModel | undefined;
-  client: RoleModel | undefined;
+  admin: RoleModel;
+  client: RoleModel;
 }> => {
   try {
-    const admin: RoleModel = await RoleModel.create({ name: 'admin' });
-    const client: RoleModel = await RoleModel.create({ name: 'client' });
+    const admin: RoleModel = await RoleModel.create({
+      name: 'admin',
+    } as RoleModel);
+    const client: RoleModel = await RoleModel.create({
+      name: 'client',
+    } as RoleModel);
     console.log('Roles admin and client inserted successfully');
     return { admin, client };
-  } catch (error) {
+  } catch (error: any) {
     console.log(`Error inserting base roles: ${error}`);
-    return { client: undefined, admin: undefined };
+
+    throw Error(error);
   }
 };
 
 const insertEntities = async (): Promise<{
-  order: EntityModel | undefined;
-  user: EntityModel | undefined;
+  order: EntityModel;
+  user: EntityModel;
 }> => {
   try {
-    const order: EntityModel = await EntityModel.create({ name: 'order' });
-    const user: EntityModel = await EntityModel.create({ name: 'user' });
+    const order: EntityModel = await EntityModel.create({
+      name: 'order',
+    } as EntityModel);
+    const user: EntityModel = await EntityModel.create({
+      name: 'user',
+    } as EntityModel);
     console.log(`Entities order and user inserted successfully`);
     return { order, user };
   } catch (error) {
-    console.log(`Error inserting base entities: ${error}`);
-    return { order: undefined, user: undefined };
+    throw Error(`Error inserting base entities: ${error}`);
   }
 };
 
@@ -36,45 +44,60 @@ const insertPermissions = async (): Promise<void> => {
   try {
     const { admin, client } = await insertRoles();
     const { order, user } = await insertEntities();
-    await PermissionModel.create({
-      RoleId: admin?.dataValues.id,
-      EntityId: order?.dataValues.id,
-      canCreate: false,
-      canUpdate: false,
-      canDelete: false,
-      canGet: false,
-    });
 
-    await PermissionModel.create({
-      RoleId: client?.dataValues.id,
-      EntityId: user?.dataValues.id,
-      canCreate: false,
-      canUpdate: false,
-      canDelete: false,
-      canGet: false,
-    });
+    await PermissionModel.create(
+      {
+        roleId: admin.id,
+        entityId: order.id,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canGet: false,
+      } as PermissionModel,
+      { include: [RoleModel, EntityModel] }
+    );
 
-    await PermissionModel.create({
-      RoleId: client?.dataValues.id,
-      EntityId: order?.dataValues.id,
-      canCreate: true,
-      canUpdate: true,
-      canDelete: false,
-      canGet: true,
-    });
+    await PermissionModel.create(
+      {
+        roleId: client.id,
+        entityId: user.id,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canGet: false,
+      } as PermissionModel,
+      { include: [RoleModel, EntityModel] }
+    );
 
-    await PermissionModel.create({
-      RoleId: admin?.dataValues.id,
-      EntityId: user?.dataValues.id,
-      canCreate: true,
-      canUpdate: true,
-      canDelete: true,
-      canGet: true,
-    });
+    await PermissionModel.create(
+      {
+        roleId: client.id,
+        entityId: order.id,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: false,
+        canGet: true,
+      } as PermissionModel,
+      { include: [RoleModel, EntityModel] }
+    );
+
+    await PermissionModel.create(
+      {
+        roleId: admin.id,
+        entityId: user.id,
+        canCreate: true,
+        canUpdate: true,
+        canDelete: true,
+        canGet: true,
+      } as PermissionModel,
+      { include: [RoleModel, EntityModel] }
+    );
 
     console.log(`Permissions inserted successfully`);
-  } catch (error) {
-    console.log(`Error inserting permissions for roles and entities: ${error}`);
+  } catch (error: any) {
+    console.log(`Error inserting permissions for roles and entities:`, error);
+
+    throw Error(error);
   }
 };
 

@@ -1,29 +1,31 @@
-import { injectable } from 'tsyringe';
-import ProductModel from '../models/productModel';
+import { inject, injectable } from 'tsyringe';
 import ProductType from '../interfaces/product';
 import ProductRepository from '../repositories/productRepository';
 
 @injectable()
 export default class ProductService {
-  productRepository = ProductRepository;
+  constructor(
+    @inject('ProductRepository')
+    private readonly productRepository: ProductRepository
+  ) {}
 
-  async getAllProducts(): Promise<ProductModel[]> {
+  async getAllProducts(): Promise<ProductType[]> {
     return await this.productRepository.findAll();
   }
 
-  async getProductById(id: number): Promise<ProductModel | null> {
+  async getProductById(id: number): Promise<ProductType | null> {
     return await this.productRepository.findById(id);
   }
 
   async createProduct(
     product: Partial<ProductType>
-  ): Promise<ProductModel | null> {
+  ): Promise<ProductType | null> {
     return await this.productRepository.create(product);
   }
 
   async updateProduct(
     id: number,
-    product: Partial<ProductModel>
+    product: Partial<ProductType>
   ): Promise<[affectedCount: number]> {
     return await this.productRepository.update(id, product);
   }

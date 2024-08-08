@@ -2,39 +2,48 @@ import { injectable } from 'tsyringe';
 import UserModel from '../models/userModel';
 import UserType from '../interfaces/user';
 import RoleModel from '../models/roleModel';
+import CartModel from '../models/cartModel';
 
 @injectable()
 export default class UserRepository {
-  static async findAll(): Promise<UserModel[]> {
+  async findAll(): Promise<UserType[]> {
     return await UserModel.findAll({ include: RoleModel });
   }
 
-  static async findById(id: number): Promise<UserModel | null> {
-    return await UserModel.findByPk(id);
+  async findById(id: number): Promise<UserType | null> {
+    return await UserModel.findByPk(id, { include: RoleModel });
   }
 
-  static async findByEmail(email: string): Promise<UserModel | null> {
+  async findByEmail(email: string): Promise<UserType | null> {
     return await UserModel.findOne({ where: { email } });
   }
 
-  static async create(
-    user: Partial<UserType>,
-    roleId: number
-  ): Promise<UserModel> {
-    return await UserModel.create({
-      ...user,
-      RoleId: roleId,
-    });
+  async create(user: Partial<UserType>, roleId: number): Promise<UserType> {
+    const newUser: UserModel = await UserModel.create(
+      {
+        ...user,
+        roleId,
+      } as UserModel,
+      { include: RoleModel }
+    );
+    if (roleId === 2) {
+      const cart = await CartModel.create({ userId: newUser.id } as CartModel, {
+        include: UserModel,
+      });
+      console.log({ cart });
+    }
+
+    return newUser;
   }
 
-  static async update(
+  async update(
     id: number,
-    user: Partial<UserModel>
+    user: Partial<UserType>
   ): Promise<[affectedCount: number]> {
     return await UserModel.update(user, { where: { id } });
   }
 
-  static async delete(id: number): Promise<number> {
+  async delete(id: number): Promise<number> {
     return await UserModel.destroy({ where: { id } });
   }
 }

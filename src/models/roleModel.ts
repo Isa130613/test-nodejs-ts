@@ -1,19 +1,33 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
+import {
+  AutoIncrement,
+  Column,
+  DataType,
+  HasMany,
+  PrimaryKey,
+  Table,
+  Model,
+} from 'sequelize-typescript';
+import PermissionModel from './permissionModel';
+import UserModel from './userModel';
 
-export default class RoleModel extends Model {}
+@Table({
+  tableName: 'roles',
+  modelName: 'Role',
+  timestamps: false,
+})
+export default class RoleModel extends Model<RoleModel> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({
+    type: DataType.INTEGER,
+  })
+  id!: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  name!: string;
 
-RoleModel.init(
-  {
-    name: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Roles',
-    tableName: 'roles',
-    timestamps: false,
-  }
-);
+  @HasMany(() => PermissionModel)
+  permissions!: PermissionModel[];
+
+  @HasMany(() => UserModel)
+  users!: UserModel[];
+}

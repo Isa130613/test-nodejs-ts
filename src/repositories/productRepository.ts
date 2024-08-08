@@ -1,29 +1,39 @@
 import { injectable } from 'tsyringe';
 import ProductModel from '../models/productModel';
-import RoleModel from '../models/roleModel';
 import ProductType from '../interfaces/product';
+import ProductCartModel from '../models/productCartModel';
 
 @injectable()
 export default class ProductRepository {
-  static async findAll(): Promise<ProductModel[]> {
-    return await ProductModel.findAll({ include: RoleModel });
+  async findAll(): Promise<ProductType[]> {
+    return await ProductModel.findAll({ include: ProductCartModel });
   }
 
-  static async findById(id: number) {
+  async findById(id: number): Promise<ProductType | null> {
     return await ProductModel.findByPk(id);
   }
 
-  static async create(product: Partial<ProductType>): Promise<ProductModel> {
-    return await ProductModel.create({
-      ...product,
+  async findManyByProductCartId(id: number) {
+    return await ProductModel.findAll({
+      where: { productsCarts: { id } },
+      include: ProductCartModel,
     });
   }
 
-  static async update(id: number, product: Partial<ProductModel>) {
+  async create(product: Partial<ProductType>): Promise<ProductType> {
+    return await ProductModel.create({
+      ...product,
+    } as ProductModel);
+  }
+
+  async update(
+    id: number,
+    product: Partial<ProductType>
+  ): Promise<[affectedCount: number]> {
     return await ProductModel.update(product, { where: { id } });
   }
 
-  static async delete(id: number) {
+  async delete(id: number): Promise<number> {
     return await ProductModel.destroy({ where: { id } });
   }
 }

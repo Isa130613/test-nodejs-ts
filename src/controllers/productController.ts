@@ -1,6 +1,5 @@
 import { container } from 'tsyringe';
 import { Request, Response } from 'express';
-import ProductModel from '../models/userModel';
 import ProductType from '../interfaces/product';
 import ProductService from '../services/productService';
 
@@ -11,9 +10,13 @@ export default class ProductController {
 
       const productService: ProductService = container.resolve(ProductService);
 
-      const product: ProductModel | null = await productService.createProduct(
+      const product: ProductType | null = await productService.createProduct(
         productBody
       );
+
+      if (!product) {
+        throw new Error('Fields invalid');
+      }
       res.status(200).json({
         message: 'product created successfully',
         product,
@@ -28,10 +31,10 @@ export default class ProductController {
     }
   }
 
-  static async getAllProducts(req: Request, res: Response) {
+  static async getAllProducts(_: Request, res: Response) {
     try {
       const productService: ProductService = container.resolve(ProductService);
-      const products: ProductModel[] = await productService.getAllProducts();
+      const products: ProductType[] = await productService.getAllProducts();
       res.status(200).json({
         status: 200,
         products,
@@ -48,7 +51,7 @@ export default class ProductController {
     try {
       const productService: ProductService = container.resolve(ProductService);
       const id: number = parseInt(req.params.id);
-      const product: ProductModel | null = await productService.getProductById(
+      const product: ProductType | null = await productService.getProductById(
         id
       );
 
@@ -72,12 +75,12 @@ export default class ProductController {
   }
 
   static async updateProduct(req: Request, res: Response) {
-    const id: number = parseInt(req.params.id);
-    const product: Partial<ProductModel> = req.body;
+    const paramId: number = parseInt(req.params.id);
+    const { id, ...product }: ProductType = req.body;
     try {
       const productService: ProductService = container.resolve(ProductService);
       const [affectedCount]: number[] = await productService.updateProduct(
-        id,
+        paramId,
         product
       );
 

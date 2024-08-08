@@ -1,30 +1,52 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
+import {
+  Table,
+  Model,
+  Column,
+  AutoIncrement,
+  DataType,
+  PrimaryKey,
+  ForeignKey,
+  BelongsTo,
+  HasOne,
+  HasMany,
+} from 'sequelize-typescript';
 import RoleModel from './roleModel';
+import CartModel from './cartModel';
+import OrderModel from './orderModel';
 
-export default class UserModel extends Model {}
+@Table({
+  tableName: 'users',
+  modelName: 'User',
+  timestamps: false,
+})
+export default class UserModel extends Model<UserModel> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({
+    type: DataType.INTEGER,
+  })
+  id!: number;
 
-UserModel.init(
-  {
-    email: {
-      type: DataTypes.STRING(200),
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-    },
-    RoleId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: RoleModel,
-        key: 'id',
-      },
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Users',
-    tableName: 'users',
-    timestamps: false,
-  }
-);
+  @Column({ type: DataType.STRING, allowNull: false })
+  email!: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  password!: string;
+
+  @ForeignKey(() => RoleModel)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    field: 'role_id',
+  })
+  roleId!: number;
+
+  @BelongsTo(() => RoleModel)
+  role!: RoleModel;
+
+  @HasOne(() => CartModel)
+  cart!: CartModel;
+
+  @HasMany(() => OrderModel)
+  orders!: OrderModel[];
+}

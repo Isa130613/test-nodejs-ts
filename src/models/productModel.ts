@@ -1,29 +1,45 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/db';
+import {
+  AutoIncrement,
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import ProductCart from './productCartModel';
 
-export default class ProductModel extends Model {}
+@Table({
+  tableName: 'products',
+  modelName: 'Product',
+  timestamps: false,
+})
+export default class ProductModel extends Model<ProductModel> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({
+    type: DataType.INTEGER,
+  })
+  id!: number;
 
-ProductModel.init(
-  {
-    name: {
-      type: DataTypes.STRING(200),
-      unique: true,
-    },
-    price: {
-      type: DataTypes.DECIMAL,
-    },
-    description: {
-      type: DataTypes.TEXT,
-    },
-    stock: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Product',
-    tableName: 'products',
-    timestamps: false,
-  }
-);
+  @Column({ type: DataType.STRING(200), allowNull: false })
+  name!: string;
+
+  @Column({ type: DataType.STRING })
+  description!: string;
+
+  @Column({
+    type: DataType.DECIMAL(10, 2),
+    allowNull: false,
+  })
+  price!: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  stock!: number;
+
+  @HasMany(() => ProductCart)
+  productsCarts!: ProductCart[];
+}

@@ -1,13 +1,15 @@
 import { resolve } from 'path';
 import { config } from 'dotenv';
-import { Model, Sequelize } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 import { Dialect } from 'sequelize';
-import {
-  AutoIncrement,
-  Column,
-  DataType,
-  PrimaryKey,
-} from 'sequelize-typescript';
+import EntityModel from '../models/entityModel';
+import PermissionModel from '../models/permissionModel';
+import ProductModel from '../models/productModel';
+import RoleModel from '../models/roleModel';
+import UserModel from '../models/userModel';
+import CartModel from '../models/cartModel';
+import ProductCartModel from '../models/productCartModel';
+import OrderModel from '../models/orderModel';
 
 config({ path: resolve(__dirname, '../../.env') });
 
@@ -27,6 +29,17 @@ const sequelize: Sequelize = new Sequelize({
   username,
   password,
   database,
+  models: [
+    EntityModel,
+    PermissionModel,
+    ProductModel,
+    RoleModel,
+    UserModel,
+    CartModel,
+    ProductCartModel,
+    OrderModel,
+  ],
+  logging: false,
 });
 
 export default sequelize;
